@@ -123,7 +123,7 @@ def write_readme(dirname, timestamp, q, limit):
             readme.write('Limit: {}'.format(limit))
 
 
-def main(query_list, fb_email, fb_password, ad_limit=None, headless=True, take_screenshot=True):
+def main(query_list, fb_email, fb_password, ad_limit=None, headless=True, take_screenshot=True, get_impressions=True):
     timestamp = datetime.now()
     print(query_list)
     if not query_list:
@@ -268,7 +268,7 @@ def main(query_list, fb_email, fb_password, ad_limit=None, headless=True, take_s
                         ad['end_date'] = datetime.fromtimestamp(ad_creative['endDate']).isoformat()
                     ads[ad_archive_id] = ad
 
-                    if ad_archive_id not in ads_seen:
+                    if ad_archive_id not in ads_seen and get_impressions:
                         #make ad performance request
                         sleep(1)
                         insight_url = 'https://www.facebook.com/ads/archive/async/insights?{}'.format(urlencode({'ad_archive_id':ad_archive_id, 'dpr':2}))
@@ -323,11 +323,12 @@ if __name__ == '__main__':
     parser.add_argument('--limit', help='Limit on number of ds to scrape', type=int)
     parser.add_argument('--headed', help='Use a headed chrome browser', action='store_true')
     parser.add_argument('--no_screenshot', help='Don\'t take screenshot of individual ads')
+    parser.add_argument('--no_impressions', help='Don\'t get impressions data, ad creative only')
 
     args = parser.parse_args()
     if args.file:
         with open(args.file) as term_file:
             query_terms = set(term_file.readlines())
-            main(query_terms, args.email, args.password, ad_limit=args.limit, headless=not args.headed, take_screenshot=not args.no_screenshot)
+            main(query_terms, args.email, args.password, ad_limit=args.limit, headless=not args.headed, take_screenshot=not args.no_screenshot, get_impressions = not args.no_impressions)
     else:
-        main(args.query, args.email, args.password, ad_limit=args.limit, headless=not args.headed, take_screenshot=not args.no_screenshot)
+        main(args.query, args.email, args.password, ad_limit=args.limit, headless=not args.headed, take_screenshot=not args.no_screenshot, get_impressions = not args.no_impressions)
