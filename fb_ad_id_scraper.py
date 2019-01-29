@@ -127,6 +127,8 @@ def main(text, ad_ids, ad_limit=None, headless=True):
         for ad_id in ad_ids:
             if ad_id in tmp_results:
                 results[ad_id] = tmp_results[ad_id]
+            else:
+                results[ad_id] = None
 
         return results
 
@@ -159,13 +161,15 @@ if __name__ == '__main__':
         header = csv_reader
         for row in csv_reader:
             markup = row['message']
-            soup = BeautifulSoup(markup)
+            soup = BeautifulSoup(markup, "html5lib")
             date_str = row['created_at']
             parts = date_str.split(' ')
             created_date = datetime.strptime(parts[0], '%Y-%m-%d').date()
-            archive_start_date = datetime.strptime('2018-05-01', '%Y-%m-%d').date()
+            archive_start_date = datetime.strptime('2018-05-24', '%Y-%m-%d').date()
             if created_date >= archive_start_date and row['id'] not in existing_ads:
                 body = soup.get_text()
+                if body == '':
+                    continue
                 if body in ads:
                     ads[body].append(row['id'])
                 else:
